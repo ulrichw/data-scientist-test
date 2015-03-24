@@ -7,6 +7,7 @@ require(RSQLite) #SQLite library for R
 require(sqldf)   #to convert database tables into R data frames
 require(MASS)    #modern applied statistics package
 require(plotrix) #for 3D pie charts
+#require(poweRlaw)#for power-law distributions
 
 #Open a connection to the database
 db <- dbConnect(SQLite(),dbname="ds_prescreen_2014/tasks.sqlite")
@@ -101,7 +102,7 @@ line <- readline()
 
 
 #A visualization:
-#Let's visualzse the distribution of total amount of money spent by users
+#Let's visualize the distribution of total amount of money spent by users
 #-----------------------------------------------------------------------------------------
 
 res <- sqldf("SELECT max(session_count) AS max_sessions, sum(cash_amount) AS sum_amount, min(cash_amount) AS min_amount FROM account NATURAL JOIN transactions GROUP BY account_id;",dbname="ds_prescreen_2014/tasks.sqlite")
@@ -182,6 +183,11 @@ df<-data.frame(x,y)
 z <- lm(y~log(x))
 lines(x,z$fitted,col="darkblue",lwd=3)
 SS<-sum((z$fitted-y)^2)
+
+#print("Fit with poweRlaw")
+#mr=conpl$new(res$days_elapsed)
+#est=estimate_xmin(mr)
+#mr$setXmin(est)
 
 #Or, I can just use the fitdistr() function of MASS to fit an exponential distribution to 
 #the days_elapsed!
