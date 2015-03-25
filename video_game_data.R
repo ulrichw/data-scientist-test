@@ -38,7 +38,7 @@ dbClearResult(res)
 
 #the following query is actually more generic than just iPad vs iPhone: it tests whether
 #there are any users that use two different devices.
-#since the answer is no, hen the answer to the initial question is also no
+#since the answer is no, then the answer to the initial question is also no
 res <- dbSendQuery(conn=db,"SELECT DISTINCT C.account_id FROM (SELECT A.account_id, A.device AS device1, B.device AS device2 FROM account_device AS A, 
 account_device AS B WHERE A.account_id = B.account_id) AS C WHERE device1 <> device2;")
 #res <- dbSendQuery(conn=db,"SELECT count(account_id) FROM account_device GROUP BY account_id;")
@@ -50,9 +50,6 @@ dbClearResult(res)
 #res <- sqldf("SELECT * FROM account_device",dbname="ds_prescreen_2014/tasks.sqlite")
 #dupl <- duplicated(res$account_id)
 #print(any(dupl)) #returns FALSE, so there are no duplicated user account: looks like every user only has one device
-
-#could have done: res <- dbReadTable(db,"account_device")
-#any(duplicated(res))
 
 #Which country produces the most revenues?
 #-----------------------------------------------------------------------------------------
@@ -107,7 +104,7 @@ line <- readline()
 
 res <- sqldf("SELECT max(session_count) AS max_sessions, sum(cash_amount) AS sum_amount, min(cash_amount) AS min_amount FROM account NATURAL JOIN transactions GROUP BY account_id;",dbname="ds_prescreen_2014/tasks.sqlite")
 png('ds_prescreen_2014/histogram2.png',width=4,height=6,units="in",res=300)
-hist(res$sum_amount,breaks=100,freq=FALSE,main="pdf of total spending per user",col="darkblue",xlab="Total spending")
+hist(res$sum_amount,breaks=100,freq=FALSE,main="probability density function \n of total spending per user",col="darkblue",xlab="Total spending (USD)")
 dev.off()
 
 # Another visualization: geographic repartition of the players
@@ -141,7 +138,7 @@ labels <- c(res$create_country[selected],"Other")
 cash_count <- c(res$cash_count[selected],mean(res$cash_count[rejected]))
 
 png('ds_prescreen_2014/bar.png',width=6,height=4,units="in",res=300)
-barplot(cash_count,names.arg=labels,las=2,main="Average spending per transaction per country",col="darkblue")
+barplot(cash_count,names.arg=labels,las=2,main="Average transaction amount per country (USD)",col="darkblue",xlab="Country",ylab="Amount (USD)")
 dev.off()
 
 #Last visualisation: a boxplot of spending per country
@@ -158,7 +155,7 @@ res <- res[selected]
 res$Other <- res_rej[[1]]
 
 png('ds_prescreen_2014/boxplot.png',width=6,height=4,units="in",res=300)
-boxplot(res,las=2,range=2,varwidth=TRUE,border=c("darkblue","darkgreen"),col="red",main="Box-whiskers plot of amount per transaction \n for countries with more than 50 transactions")
+boxplot(res,las=2,range=2,varwidth=TRUE,border=c("darkblue","darkgreen"),col="red",main="Box-whiskers plot of amount per transaction (USD) \n for countries with more than 50 transactions",xlab="Country",ylab="Amount (USD)")
 dev.off()
 
 #Let's study the distribution of in-app purchases as a function of time since the user
@@ -172,7 +169,7 @@ res <- sqldf("SELECT A.account_id, A.created_date,julianday(B.created_time)-juli
 png('ds_prescreen_2014/histogram.png',width=4,height=6,units="in",res=300)
 
 #let's look at the distribution of in-app purchases
-y<-hist(res$days_elapsed,freq=FALSE,breaks=100,main='pdf of days when a purchase occurs',col='lightblue',
+y<-hist(res$days_elapsed,freq=FALSE,breaks=100,main='probability density function \n of days when a purchase occurs',col='lightblue',
         xlab="Days since the user profile was created")$density
 #lines(density(res$days_elapsed,adjust=0.25),col="red",lwd=3)
 x<-seq(0.5,length(y)-0.5,1.0) #use the mid-point of the bin
@@ -221,7 +218,7 @@ res <- sqldf("SELECT max(session_count) AS max_sessions, sum(cash_amount) AS sum
 #game sessions) and the amount of money he/she will spend on the game?
 #i.e.: is involvement a good predictor of spending?
 png('ds_prescreen_2014/corr.png',width=4,height=4,units="in",res=300)
-plot(res$max_sessions,res$sum_amount,xlab="Number of sessions",pch=20,ylab="Total spending",
+plot(res$max_sessions,res$sum_amount,xlab="Number of sessions",pch=20,ylab="Total spending (USD)",
      col="darkred",main="Total spending per user as a function \n of their number of game sessions")
 abline(lm(res$sum_amount ~ res$max_sessions),col="darkgreen",lwd=3)
 print(cor(res$max_sessions,res$sum_amount))
@@ -238,7 +235,7 @@ res <- sqldf("SELECT account_id AS id, min(delay) AS delay, sum(cash_amount) AS 
              ,dbname="ds_prescreen_2014/tasks.sqlite")
 
 png('ds_prescreen_2014/histogram3.png',width=4,height=4,units="in",res=300)
-plot(res$delay,res$cash,pch=20,xlab="days before conversion",ylab="Total spending",col="red")
+plot(res$delay,res$cash,pch=20,xlab="days before conversion",ylab="Total spending (USD)",main="Total spending per user as a function \n of the delay to conversion",col="darkred")
 print(cor.test(res$delay,res$cash, method="pearson"))
 print(cor.test(res$delay,res$cash, method="spearman"))
 dev.off()
